@@ -7,6 +7,7 @@ jump more realistic. The player goes up quickly, but falls slowly.
 
 """
 import pygame
+import math
 from dataclasses import dataclass
 
 # Initialize Pygame
@@ -35,8 +36,6 @@ class GameSettings:
 # Initialize game settings
 settings = GameSettings()
 
-
-
 # Initialize screen
 screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
 
@@ -46,7 +45,18 @@ player = pygame.Rect(settings.player_x,
                      settings.player_size, settings.player_size)
 
 player_y_velocity = 0
+player_x_velocity = 0
+player_x_acceleration = 0
+player_y_acceleration = 0
 is_jumping = False
+
+def get_grav(x, y, p_x, p_y, p):
+    p/=10
+    if p_x != 0:
+        h = math.sqrt((p_x-x)**2 + (p_y-y)**2)
+        return (p*(p_x-x)) / h**2, (p*(p_y-y)) / h**2
+    else:
+        return 0, p / (((p_y-settings.player_size)-y + 1)**2)
 
 # Main game loop
 running = True
@@ -66,14 +76,24 @@ while running:
         # Jumping means that the player is going up. The top of the 
         # screen is y=0, and the bottom is y=SCREEN_HEIGHT. So, to go up,
         # we need to have a negative y velocity
-        player_y_velocity = -settings.jump_velocity
+        player_y_velocity = -1
         is_jumping = True
 
     # Update player position. Gravity is always pulling the player down,
     # which is the positive y direction, so we add GRAVITY to the y velocity
     # to make the player go up more slowly. Eventually, the player will have
     # a positive y velocity, and gravity will pull the player down.
-    player_y_velocity += settings.gravity
+    floor = get_grav(player.x, player.y, 0, 500, settings.gravity)
+    top = get_grav(player.x, player.y, 0, 0, settings.gravity)
+    planet_1_vec = get_grav(player.x, player.y, 250, 250, settings.gravity)
+    player_x_acceleration = planet_1_vec[0]
+    player_y_acceleration = planet_1_vec[1]
+    print("" + str(player_x_acceleration) + ", " + str(player_y_acceleration))
+    player_x_velocity += player_x_acceleration
+    #player_x_velocity = min(10, player_x_velocity)
+    player_y_velocity += player_y_velocity
+    #player_y_velocity = min(10, player_y_velocity)
+    player.x += player_x_velocity
     player.y += player_y_velocity
 
     # If the player hits the ground, stop the player from falling.
@@ -86,9 +106,15 @@ while running:
         player.bottom = settings.screen_height 
         player_y_velocity = 0
         is_jumping = False
+    # elif player.top <= 0:
+    #     player.top = 0
+    #     player_y_velocity = 0
+    #     is_jumping = False
+
 
     # Draw everything
     screen.fill(settings.white)
+    pygame.draw.circle(screen, (255, 0, 0), (250, 250), 50)
     pygame.draw.rect(screen, settings.black, player)
 
     pygame.display.flip()
