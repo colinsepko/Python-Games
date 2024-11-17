@@ -51,12 +51,19 @@ player_y_acceleration = 0
 is_jumping = False
 
 def get_grav(x, y, p_x, p_y, p):
-    p/=10
+    p*=10
     if p_x != 0:
         h = math.sqrt((p_x-x)**2 + (p_y-y)**2)
-        return (p*(p_x-x)) / h**2, (p*(p_y-y)) / h**2
+        return 100*(p*(p_x-x)) / h**3, 100*(p*(p_y-y)) / h**3
     else:
-        return 0, p / (((p_y-settings.player_size)-y + 1)**2)
+        return 0, 50*p / ((p_y-y)**2)
+    
+def translate_velocity(x, y, p_x, p_y, min_dist):
+    h = math.sqrt((p_x-x)**2 + (p_y-y)**2)
+    if h < min_dist:
+        return ((p_y-y)**2)/(h**2), ((p_x-x)**2)/(h**2)
+    else:
+        return 1, 1
 
 # Main game loop
 running = True
@@ -72,27 +79,64 @@ while running:
     # Continuously jump. If the player is not jumping, initialize a new jump
     keys = pygame.key.get_pressed()
 
+    mouse = pygame.mouse.get_pressed()
+    mouse_loc = pygame.mouse.get_pos()
+    print(mouse_loc)
+
+    if mouse[0]:
+        player.x = mouse_loc[0]
+        player.y = mouse_loc[1]
+
     if is_jumping is False and keys[pygame.K_SPACE]:
         # Jumping means that the player is going up. The top of the 
         # screen is y=0, and the bottom is y=SCREEN_HEIGHT. So, to go up,
-        # we need to have a negative y velocity
+        # we need to have a negative y velocity.
         player_y_velocity = -1
         is_jumping = True
+
+    if player.bottom >= settings.screen_height:
+        player.bottom = settings.screen_height 
+        player_y_velocity = 0
+    elif player.top <= 0:
+        player.top = 1
+        player_y_velocity = 0
+    if player.right >= settings.screen_width:
+        player.right = settings.screen_width 
+        player_x_velocity = -player_x_velocity
+    elif player.left <= 0:
+        player.left = 0 
+        player_x_velocity = -player_x_velocity
+
+    if keys[pygame.K_a]:
+        player_x_velocity = min(-3, player_x_velocity)
+    if keys[pygame.K_d]:
+        player_x_velocity = max(3, player_x_velocity)
+    if keys[pygame.K_w]:
+        player_y_velocity = min(-3, player_y_velocity)
+    if keys[pygame.K_s]:
+        player_y_velocity = max(3, player_y_velocity)
+
 
     # Update player position. Gravity is always pulling the player down,
     # which is the positive y direction, so we add GRAVITY to the y velocity
     # to make the player go up more slowly. Eventually, the player will have
     # a positive y velocity, and gravity will pull the player down.
     floor = get_grav(player.x, player.y, 0, 500, settings.gravity)
-    top = get_grav(player.x, player.y, 0, 0, settings.gravity)
-    planet_1_vec = get_grav(player.x, player.y, 250, 250, settings.gravity)
+    top = get_grav(player.x, player.y, 0, 0, -settings.gravity)
+    planet_1_vec = get_grav(player.x, player.y, 250, 250, settings.gravity*2)
     player_x_acceleration = planet_1_vec[0]
-    player_y_acceleration = planet_1_vec[1]
+    player_y_acceleration = planet_1_vec[1] + floor[1] + top[1]
     print("" + str(player_x_acceleration) + ", " + str(player_y_acceleration))
     player_x_velocity += player_x_acceleration
     #player_x_velocity = min(10, player_x_velocity)
-    player_y_velocity += player_y_velocity
+    player_y_velocity += player_y_acceleration
     #player_y_velocity = min(10, player_y_velocity)
+
+    vel = translate_velocity(player.x, player.y, 250, 250, 50)
+
+    player_x_velocity *= vel[0]
+    player_y_velocity *= vel[1]
+
     player.x += player_x_velocity
     player.y += player_y_velocity
 
@@ -102,10 +146,14 @@ while running:
     # player is greater than the height of the screen, the player is on the
     # ground. So, set the player's y position to the bottom of the screen
     # and stop the player from falling
-    if player.bottom >= settings.screen_height:
-        player.bottom = settings.screen_height 
-        player_y_velocity = 0
-        is_jumping = False
+    h = math.sqrt((250-player.x)**2 + (250-player.y)**2)
+    if h < 50:
+        player.x = 250 + (50*(player.x-250))/h
+        player.y = 250 + (50*(player.y-250))/h
+
+
+    
+    
     # elif player.top <= 0:
     #     player.top = 0
     #     player_y_velocity = 0
@@ -116,6 +164,12 @@ while running:
     screen.fill(settings.white)
     pygame.draw.circle(screen, (255, 0, 0), (250, 250), 50)
     pygame.draw.rect(screen, settings.black, player)
+
+    pygame.draw.line(screen, pygame.Color(0,0,255), (player.x+5, player.y+5), (5+player.x+(player_x_velocity*10), 5+player.y))
+    pygame.draw.line(screen, pygame.Color(0,0,255), (player.x+5, player.y+5), (5+player.x, 5+player.y+(player_y_velocity*10)))
+
+    pygame.draw.line(screen, pygame.Color(255,0,0), (player.x+5, player.y+5), (5+player.x+(player_x_acceleration*10), 5+player.y))
+    pygame.draw.line(screen, pygame.Color(255,0,0), (player.x+5, player.y+5), (5+player.x, 5+player.y+(player_y_acceleration*10)))
 
     pygame.display.flip()
     clock.tick(settings.tick_rate)
