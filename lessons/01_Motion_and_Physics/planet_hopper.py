@@ -92,7 +92,7 @@ class Player:
         self.y_acc += floor[1] + top[1]
 
         for planet in planets:
-            planet_vec = get_grav(player.x, player.y, 250, 250, settings.gravity*2)
+            planet_vec = get_grav(self.x, self.y, planet.x, planet.y, planet.p)
             self.x_acc += planet_vec[0]
             self.y_acc += planet_vec[1]
 
@@ -166,8 +166,8 @@ running = True
 clock = pygame.time.Clock()
 
 game_planets = [Planet(250, 250, 50, settings.gravity*2)]
-game_planets.append(Planet(100, 250, 5, settings.gravity, True, game_planets[0], 0, 2))
-game_planets.append(Planet(450, 400, 20, settings.gravity*5))
+game_planets.append(Planet(100, 250, 20, settings.gravity/2, True, game_planets[0], 0, 2))
+game_planets.append(Planet(450, 400, 30, settings.gravity*2))
 
 player = Player(settings.player_x, 100)
 
