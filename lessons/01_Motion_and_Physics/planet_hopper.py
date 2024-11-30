@@ -21,12 +21,18 @@ def get_grav(x, y, p_x, p_y, p):
     else:
         return 0, 50*p / ((p_y-y)**2)
     
-def translate_velocity(x, y, p_x, p_y, min_dist):
+def translate_velocity(x, y, p_x, p_y, perp=False):
     h = math.sqrt((p_x-x)**2 + (p_y-y)**2)
+    if perp:
+        return (p_x-x)/h, (p_y-y)/h
+    else:
+        return ((p_y-y)**2)/(h**2), ((p_x-x)**2)/(h**2)
+"""
     if h < min_dist:
         return ((p_y-y)**2)/(h**2), ((p_x-x)**2)/(h**2)
     else:
         return 1, 1
+"""
 
 # This is a data class, one way of storing settings and constants for a game.
 # We will create an instance of the data class, but since there is only one of
@@ -82,30 +88,28 @@ class Player:
         self.y_acc = 0
         self.show_vec = False
         self.on_surface = False
+        self.curr_planet = None
         self.pyplayer = pygame.Rect(self.x, self.y, self.size, self.size)
 
     def apply_physics(self, planets):
-        self.x_acc = 0
-        self.y_acc = 0
-        floor = get_grav(self.x, self.y, 0, 500, settings.gravity)
-        top = get_grav(self.x, self.y, 0, 0, -settings.gravity)
-        self.y_acc += floor[1] + top[1]
+        self.x_acc = -self.x_vel*abs(self.x_vel)/1000
+        self.y_acc = -self.y_vel*abs(self.y_vel)/1000
 
-        for planet in planets:
-            planet_vec = get_grav(self.x, self.y, planet.x, planet.y, planet.p)
+        if self.on_surface:
+            planet_vec = get_grav(self.x, self.y, self.curr_planet.x, self.curr_planet.y, self.curr_planet.p)
             self.x_acc += planet_vec[0]
             self.y_acc += planet_vec[1]
+        else:
+            floor = get_grav(self.x, self.y, 0, 500, settings.gravity)
+            top = get_grav(self.x, self.y, 0, 0, -settings.gravity)
+            self.y_acc += floor[1] + top[1]
+            for planet in planets:
+                planet_vec = get_grav(self.x, self.y, planet.x, planet.y, planet.p)
+                self.x_acc += planet_vec[0]
+                self.y_acc += planet_vec[1]
 
-        print("" + str(self.x_acc) + ", " + str(self.y_acc))
         self.x_vel += self.x_acc
         self.y_vel += self.y_acc
-
-        for planet in planets:
-            vel = translate_velocity(player.x, player.y, planet.x, planet.y, planet.size)
-
-            self.x_vel *= vel[0]
-            self.y_vel *= vel[1]
-
 
     
     def update(self, screen, planets):
@@ -113,7 +117,6 @@ class Player:
 
         mouse = pygame.mouse.get_pressed()
         mouse_loc = pygame.mouse.get_pos()
-        print(mouse_loc)
 
         if mouse[0]:
             self.x = mouse_loc[0]
@@ -140,14 +143,39 @@ class Player:
             self.y_vel = min(-3, self.y_vel)
         if keys[pygame.K_s]:
             self.y_vel = max(3, self.y_vel)
+        if keys[pygame.K_SPACE] and self.on_surface:
+            vel = translate_velocity(player.x, player.y, self.curr_planet.x, self.curr_planet.y, True)
+            vel = translate_velocity(player.x, player.y, self.curr_planet.x, self.curr_planet.y, True)
+            self.x_vel = -(settings.jump_velocity*vel[0])/5
+            self.y_vel = -(settings.jump_velocity*vel[1])/5
+            self.on_surface = False
+            self.curr_planet = None
+
+        if self.on_surface:
+            print("vel adjust")
+            vel = translate_velocity(player.x, player.y, self.curr_planet.x, self.curr_planet.y)
+            vel = translate_velocity(player.x, player.y, self.curr_planet.x, self.curr_planet.y)
+            self.x_vel *= vel[0]
+            self.y_vel *= vel[1]
+
 
         self.x += self.x_vel
         self.y += self.y_vel
-        for planet in planets:
-            h = math.sqrt((planet.x-self.x)**2 + (planet.y-self.y)**2)
-            if h < planet.size:
-                self.x = planet.x + (planet.size*(self.x-planet.x))/h
-                self.y = planet.y + (planet.size*(self.y-planet.y))/h
+        if not self.on_surface:
+            for planet in planets:
+                self.on_surface = False
+                h = math.sqrt((planet.x-self.x)**2 + (planet.y-self.y)**2)
+                if h < planet.size:
+                    self.x = planet.x + (planet.size*(self.x-planet.x))/h
+                    self.y = planet.y + (planet.size*(self.y-planet.y))/h
+                    self.on_surface = True
+                    self.curr_planet = planet
+                    break
+        else:
+            h = math.sqrt((self.curr_planet.x-self.x)**2 + (self.curr_planet.y-self.y)**2)
+            if h != self.curr_planet.size:
+                self.x = self.curr_planet.x + (self.curr_planet.size*(self.x-self.curr_planet.x))/h
+                self.y = self.curr_planet.y + (self.curr_planet.size*(self.y-self.curr_planet.y))/h
 
         self.pyplayer.x = self.x
         self.pyplayer.y = self.y
