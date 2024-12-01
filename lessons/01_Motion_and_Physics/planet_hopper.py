@@ -150,6 +150,8 @@ class Player:
             self.y_vel = -(settings.jump_velocity*vel[1])/5
             self.on_surface = False
             self.curr_planet = None
+        if keys[pygame.K_q]:
+            self.show_vec = not self.show_vec
 
         if self.on_surface:
             print("vel adjust")
@@ -179,7 +181,12 @@ class Player:
 
         self.pyplayer.x = self.x
         self.pyplayer.y = self.y
-        pygame.draw.rect(screen, settings.black, self.pyplayer)
+        pygame.draw.rect(screen, settings.black, pygame.transform.rotate(self.pyplayer, math.asin(self.y_vel/math.sqrt(self.y_vel**2 + self.x_vel**2))))
+        if self.show_vec:
+            pygame.draw.line(screen, (0,0,255), (self.x, self.y), (self.x+(5*self.x_vel), self.y))
+            pygame.draw.line(screen, (0,0,255), (self.x, self.y), (self.x, self.y+(5*self.y_vel)))
+            pygame.draw.line(screen, (255,0,0), (self.x, self.y), (self.x+(20*self.x_acc), self.y))
+            pygame.draw.line(screen, (255,0,0), (self.x, self.y), (self.x, self.y+(20*self.y_acc)))
 
     
 
@@ -206,15 +213,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-
     # Draw everything
     screen.fill(settings.white)
 
     for planet in game_planets:
         planet.update(screen)
+    
+    #screen.blit(pygame.transform.rotate(screen, 90), (0,0))
     player.apply_physics(game_planets)
     player.update(screen, game_planets)
-
     pygame.display.flip()
     clock.tick(settings.tick_rate)
 
