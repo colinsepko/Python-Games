@@ -181,7 +181,7 @@ class Player:
 
         self.pyplayer.x = self.x
         self.pyplayer.y = self.y
-        pygame.draw.rect(screen, settings.black, pygame.transform.rotate(self.pyplayer, math.asin(self.y_vel/math.sqrt(self.y_vel**2 + self.x_vel**2))))
+        pygame.draw.rect(screen, settings.black, self.pyplayer)
         if self.show_vec:
             pygame.draw.line(screen, (0,0,255), (self.x, self.y), (self.x+(5*self.x_vel), self.y))
             pygame.draw.line(screen, (0,0,255), (self.x, self.y), (self.x, self.y+(5*self.y_vel)))

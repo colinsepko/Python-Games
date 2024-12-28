@@ -79,19 +79,40 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = 50
         self.rect.y = HEIGHT - PLAYER_SIZE - 10
         self.speed = player_speed
+        self.is_jumping = True
 
     def update(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            self.rect.y -= self.speed
-        if keys[pygame.K_DOWN]:
-            self.rect.y += self.speed
 
+        if self.is_jumping is False and keys[pygame.K_SPACE]:
+            # Jumping means that the player is going up. The top of the 
+            # screen is y=0, and the bottom is y=SCREEN_HEIGHT. So, to go up,
+            # we need to have a negative y velocity
+            self.speed = -20
+            self.is_jumping = True
+
+        # Update player position. Gravity is always pulling the player down,
+        # which is the positive y direction, so we add GRAVITY to the y velocity
+        # to make the player go up more slowly. Eventually, the player will have
+        # a positive y velocity, and gravity will pull the player down.
+        if keys[pygame.K_UP]:
+            self.speed -= 0.5
+        if keys[pygame.K_DOWN]:
+            self.speed += 0.5
+
+        
+        self.speed += 1
+        self.rect.y += self.speed
+
+        
         # Keep the player on screen
         if self.rect.top < 0:
             self.rect.top = 0
+            self.speed = 0
         if self.rect.bottom > HEIGHT:
             self.rect.bottom = HEIGHT
+            self.speed = 0
+            self.is_jumping = False
 
 # Create a player object
 player = Player()
