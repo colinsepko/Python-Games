@@ -8,6 +8,7 @@ The square is constrained to the screen, so it can't go off the edges.
 """
 import pygame
 
+
 # Initialize Pygame
 pygame.init()
 
@@ -39,7 +40,6 @@ def main():
     
     while running:
         
-
         # Event handling
         for event in pygame.event.get():
             
@@ -50,7 +50,6 @@ def main():
         # Get the keys pressed. Gtes an array of all the keys
         # with a boolean value of whether they are pressed or not
         keys = pygame.key.get_pressed()
-
 
         # Calculate the change tin the position
         d_x = 0
