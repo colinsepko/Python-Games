@@ -17,7 +17,7 @@ class GameSetting:
     PIPE_WIDTH = 80
     PIPE_HEIGHT = 500
 
-    PIPE_GAP = 150
+    PIPE_GAP = 200
 
     FRAME_RATE = 24
 
@@ -180,6 +180,8 @@ class Game:
             pygame.display.flip()
             pygame.display.update()
 
+
+        self.running = True
         while self.running:
             self.clock.tick(self.settings.FRAME_RATE)
 
@@ -221,9 +223,10 @@ class Game:
             if (pygame.sprite.groupcollide(player_group, ground_group, False, False, pygame.sprite.collide_mask) or
                 pygame.sprite.groupcollide(player_group, pipe_group, False, False, pygame.sprite.collide_mask)):
                 time.sleep(1)
-                break
+                self.running = False
 
 if __name__ == "__main__":
     game = Game(GameSetting())
-    game.run()
+    while pygame.init():
+        game.run()
     pygame.quit()
