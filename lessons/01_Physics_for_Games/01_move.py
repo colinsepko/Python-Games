@@ -8,6 +8,7 @@ The square is constrained to the screen, so it can't go off the edges.
 """
 import pygame
 
+
 # Initialize Pygame
 pygame.init()
 
@@ -16,8 +17,11 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 600, 600
 SQUARE_SIZE = 50
 SQUARE_COLOR = (0, 128, 255) # Red-Green-Blue color in the range 0-255
 BACKGROUND_COLOR = (255, 255, 255) # White
-SQUARE_SPEED = 5
+SQUARE_SPEED = 300 
 FPS = 60
+
+v = SQUARE_SPEED  # Speed of the square in pixels per second
+d_t = 1 / FPS  # Time step for physics calculations
 
 # Initialize the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -29,14 +33,13 @@ clock = pygame.time.Clock()
 # Main function
 def main():
     # Initial position of the square
-    square_x = SCREEN_WIDTH // 2 - SQUARE_SIZE // 2
-    square_y = SCREEN_HEIGHT // 2 - SQUARE_SIZE // 2
+    x = SCREEN_WIDTH // 2 - SQUARE_SIZE // 2
+    y = SCREEN_HEIGHT // 2 - SQUARE_SIZE // 2
     
     running = True
     
     while running:
         
-
         # Event handling
         for event in pygame.event.get():
             
@@ -48,6 +51,7 @@ def main():
         # with a boolean value of whether they are pressed or not
         keys = pygame.key.get_pressed()
 
+<<<<<<< HEAD:lessons/01_Motion_and_Physics/01_move.py
 
         # Move the square based on arrow keys
         if keys[pygame.K_a]:
@@ -58,10 +62,33 @@ def main():
             square_y -= SQUARE_SPEED
         if keys[pygame.K_s]:
             square_y += SQUARE_SPEED
+=======
+        # Calculate the change tin the position
+        d_x = 0
+        d_y = 0
+
+        # Move the square based on arrow keys
+        if keys[pygame.K_LEFT]:
+            d_x = -v * d_t
+          
+        if keys[pygame.K_RIGHT]:
+            d_x = v * d_t
+          
+        if keys[pygame.K_UP]:
+            d_y = -v * d_t
+          
+        if keys[pygame.K_DOWN]:
+            d_y = v * d_t
+           
+        # Update the position of the square
+        x = x + d_x
+        y = y + d_y
+
+>>>>>>> fde5e2410fc5d7efe6b612da7fd047946b1ceee4:lessons/01_Physics_for_Games/01_move.py
 
         # Prevent the square from going off the screen
-        square_x = max(0, min(SCREEN_WIDTH - SQUARE_SIZE, square_x))
-        square_y = max(0, min(SCREEN_HEIGHT - SQUARE_SIZE, square_y))
+        x = max(0, min(SCREEN_WIDTH - SQUARE_SIZE, x))
+        y = max(0, min(SCREEN_HEIGHT - SQUARE_SIZE, y))
 
         # This will clear the screen by filling it 
         # with the background color. If we didn't do this, 
@@ -69,7 +96,11 @@ def main():
         screen.fill(BACKGROUND_COLOR)
 
         # Draw the square
+<<<<<<< HEAD:lessons/01_Motion_and_Physics/01_move.py
         pygame.draw.circle(screen, SQUARE_COLOR, (square_x, square_y), SQUARE_SIZE)
+=======
+        pygame.draw.rect(screen, SQUARE_COLOR, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+>>>>>>> fde5e2410fc5d7efe6b612da7fd047946b1ceee4:lessons/01_Physics_for_Games/01_move.py
 
         # Update the display. Imagine that the screen is two different whiteboards. One
         # whiteboard is currently visible to the player, and the other whiteboard is being

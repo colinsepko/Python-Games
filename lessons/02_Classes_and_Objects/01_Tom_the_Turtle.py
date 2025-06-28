@@ -4,6 +4,28 @@ We really miss the turtle module from Python's standard library. It was a great
 way to introduce programming, so let's make something similar in PyGame, using
 objects. 
 
+This program is for assignment 3 and 4
+
+Assignment 3:
+
+1. Read and run the program `01_Tom_the_Turtle.py` in this lession directory.
+2. Create a derived class from the `Turtle` class that add some new behavior.
+   Add a function `right` that turns the turtle to the right. ( Bonus, use the
+   `left` function to implement the `right` function )
+3. In your derived class, add a new variable `color` and a way to set it. Use
+   that color to set the color of the turtle's line
+4. Add a `pen_up` and `pen_down` function that will raise and lower the pen.
+
+Assignment 4:
+
+1. Create a function ( not a method, the function should not be part of a class) 
+   in your `01_Tom_the_Turtle` program that takes a Turtle object and prints
+   out the x and y position of the turtle.
+2. Show that your function works by creating a turtle, moving it around, and
+   then calling your function, for both the base `Turtle` class and your derived
+   class.
+
+
 """
 import math
 

@@ -6,6 +6,19 @@ organize the code. The main game loop is in the Game class, and the player is
 a separate class. This makes the code easier to read and understand, and
 allows for more complex games with multiple objects.
 
+## Assignment 5
+
+1. Open `03_gravity_bounce_obj.py` 
+2. Review the program and try to understand how it works.
+3. Change the program so that the player's initial velocity and position are set
+   in the initializer to the `Player` class.
+4. Add a color for the player, configurable in the initializer.
+5. Add a second player to the game. The second player should be a different
+   color and have different initial position and velocity.
+
+When you are done, your program should have two player objects ( but only one
+Player class!), of different colors, bouncing around in different trajectories. 
+
 """
 import pygame
 
