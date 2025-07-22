@@ -11,7 +11,7 @@ allows for more complex games with multiple objects.
 1. Open `03_gravity_bounce_obj.py` 
 2. Review the program and try to understand how it works.
 3. Change the program so that the player's initial velocity and position are set
-   in the initializer to the `Player` class.
+   in the initializer to the `Player` class. 
 4. Add a color for the player, configurable in the initializer.
 5. Add a second player to the game. The second player should be a different
    color and have different initial position and velocity.
@@ -34,14 +34,20 @@ class GameSettings:
     """Settings for the game"""
     width: int = 500
     height: int = 500
-    gravity: float = 0.3
-    player_start_x: int = 100
-    player_start_y: int = None
-    player_v_y: float = 0  # Initial y velocity
-    player_v_x: float = 7  # Initial x velocity
     player_width: int = 20
     player_height: int = 20
-    player_jump_velocity: float = 15
+
+    player_start_x: int = 100
+    player_start_y: int = None
+
+    gravity: float = 200
+    v_0_y: float = 0  # Initial y velocity
+    v_0_x: float = 75 # Initial x velocity
+
+    jump_v_y: float = 400
+
+    FPS = 30
+    d_t = 1 / FPS # Time step
 
 
 class Game:
@@ -79,7 +85,7 @@ class Game:
                 player.draw(self.screen)
                 
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(self.settings.FPS)
 
         pygame.quit()
 
@@ -95,13 +101,13 @@ class Player:
         self.height = settings.player_height
       
         self.is_jumping = False
-        self.v_jump = settings.player_jump_velocity
+        self.v_jump = settings.jump_v_y
 
         self.y = settings.player_start_y if settings.player_start_y is not None else settings.height - self.height
         self.x = settings.player_start_x
         
-        self.v_x = settings.player_v_x  # X Velocity
-        self.v_y = settings.player_v_y  # Y Velocity
+        self.v_x = settings.v_0_x  # X Velocity
+        self.v_y = settings.v_0_y  # Y Velocity
 
     def update(self):
         """Update player position, continuously jumping"""
@@ -111,8 +117,8 @@ class Player:
 
     def update_y(self):
         """Update the player's y position based on gravity and velocity"""
-        self.v_y += self.game.settings.gravity  # Add gravity to the y velocity
-        self.y += self.v_y  # Update the player's y position, based on the current velocity
+        self.v_y += self.game.settings.gravity * self.game.settings.d_t # Add gravity to the y velocity
+        self.y += self.v_y * self.game.settings.d_t # Update the player's y position, based on the current velocity
 
         if self.y >= self.game.settings.height - self.height:
             self.y = self.game.settings.height - self.height
@@ -121,7 +127,7 @@ class Player:
 
     def update_x(self):
         """Update the player's x position based on horizontal velocity and bounce on edges"""
-        self.x += self.v_x  # Update the player's x position based on the current velocity
+        self.x += self.v_x * self.game.settings.d_t  # Update the player's x position based on the current velocity
 
         if self.x <= 0:
             self.x = 0

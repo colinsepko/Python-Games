@@ -9,7 +9,7 @@ This program is for assignment 3 and 4
 Assignment 3:
 
 1. Read and run the program `01_Tom_the_Turtle.py` in this lession directory.
-2. Create a derived class from the `Turtle` class that add some new behavior.
+2. Create a derived class from the `Turtle` class that adds some new behavior.
    Add a function `right` that turns the turtle to the right. ( Bonus, use the
    `left` function to implement the `right` function )
 3. In your derived class, add a new variable `color` and a way to set it. Use
